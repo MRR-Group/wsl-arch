@@ -57,6 +57,7 @@ jobs:
           tar -xzf /tmp/frp.tgz -C /tmp
           cp /tmp/frp_*/frpc /mnt/sys-root/usr/local/bin/frpc
           chmod +x /mnt/sys-root/usr/local/bin/frpc
+          cp frpc.service /mnt/sys-root/usr/lib/systemd/user/frpc.service
 
       - name: Install mmr-gen-frpc
         run: |
