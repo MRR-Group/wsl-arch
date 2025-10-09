@@ -28,6 +28,7 @@ Grab the latest build from the [**Releases**](../../releases/latest) page — do
 ### On WSL ≥ 2.4.4
 ```powershell
 wsl --install --from-file /path/to/archlinux.wsl
+```
 
 ### On older WSL
 ```powershell
