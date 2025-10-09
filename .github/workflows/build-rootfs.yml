@@ -74,7 +74,7 @@ jobs:
             echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
 
             cd /tmp
-            sudo -u builder git clonehttps://aur.archlinux.org/frp.git
+            sudo -u builder git clone https://aur.archlinux.org/frp.git
             cd /tmp/frpc-bin
             sudo -u builder makepkg -si --noconfirm
             cd /
