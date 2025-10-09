@@ -75,11 +75,11 @@ jobs:
 
             cd /tmp
             sudo -u builder git clone https://aur.archlinux.org/frp.git
-            cd /tmp/frpc-bin
+            cd /tmp/frp
             sudo -u builder makepkg -si --noconfirm
             cd /
             
-            rm -rf /tmp/frpc-bin
+            rm -rf /tmp/frp
             rm -f /etc/sudoers.d/01-builder
             userdel -r builder || true
           '
