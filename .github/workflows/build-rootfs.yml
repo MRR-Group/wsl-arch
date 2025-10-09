@@ -53,35 +53,47 @@ jobs:
       - name: Install yay
         run: |
           arch-chroot /mnt/sys-root bash -lc '
+            set -euo pipefail
             id builder &>/dev/null || useradd -m -G wheel -s /bin/bash builder
             echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
+
+           su - builder -c "
+              set -e
+              cd /tmp
+              git clone https://aur.archlinux.org/yay-bin.git
+              cd yay-bin
+              makepkg -s --noconfirm
+            "
             
-            cd /tmp
-            sudo -u builder git clone https://aur.archlinux.org/yay-bin.git
-            cd /tmp/yay-bin
-            sudo -u builder makepkg -si --noconfirm
-            cd /
-            
+            pkgfile=$(ls /tmp/yay-bin/*.pkg.tar.zst | head -n1)
+            pacman -U --noconfirm \"$pkgfile\"
+      
             rm -rf /tmp/yay-bin
-            rm -f /etc/sudoers.d/01-builder
             userdel -r builder || true
+            rm -f /etc/sudoers.d/01-builder
           '
 
-      - name: Install frpc from AUR
+      - name: Install frpc
         run: |
           arch-chroot /mnt/sys-root bash -lc '
+            set -euo pipefail
             id builder &>/dev/null || useradd -m -G wheel -s /bin/bash builder
             echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
 
-            cd /tmp
-            sudo -u builder git clone https://aur.archlinux.org/frp.git
-            cd /tmp/frp
-            sudo -u builder makepkg -si --noconfirm
-            cd /
-            
+            su - builder -c "
+              set -e
+              cd /tmp
+              git clone https://aur.archlinux.org/frp.git
+              cd frp
+              makepkg -s --noconfirm
+            "
+      
+            pkgfile=$(ls /tmp/frp/*.pkg.tar.zst | head -n1)
+            pacman -U --noconfirm \"$pkgfile\"
+      
             rm -rf /tmp/frp
-            rm -f /etc/sudoers.d/01-builder
             userdel -r builder || true
+            rm -f /etc/sudoers.d/01-builder
           '
 
       - name: Install mmr-gen-frpc
