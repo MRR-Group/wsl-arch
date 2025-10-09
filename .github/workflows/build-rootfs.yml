@@ -34,7 +34,7 @@ jobs:
         run: |
           pacstrap -G -M -C target-pacman.conf -K /mnt/sys-root \
             base curl wget vim nano sudo texinfo man-db man-pages \
-            docker docker-compose nss openssh unzip htop git go base-devel dnsmasq
+            docker docker-compose nss openssh unzip htop git go base-devel dnsmasq go-task
 
       - name: Configure
         run: |
@@ -44,11 +44,10 @@ jobs:
           echo "%wheel ALL=(ALL:ALL) ALL" > /mnt/sys-root/etc/sudoers.d/wheel &&
           echo "tmpfs /tmp tmpfs mode=1777,strictatime,nosuid,nodev,size=50%,nr_inodes=1m 0 0" >> /mnt/sys-root/etc/fstab &&
           arch-chroot /mnt/sys-root /usr/sbin/systemctl mask systemd-binfmt.service systemd-resolved.service systemd-networkd.service tmp.mount &&
-          rm -rf /mnt/sys-root/etc/pacman.d/gnupg &&
-          rm -rf /mnt/sys-root/var/lib/pacman/sync/ &&
-          rm -f /mnt/sys-root/etc/machine-id &&
-          : > /mnt/sys-root/etc/machine-id &&
-          rm -rf /mnt/sys-root/var/cache/pacman/pkg/*
+
+      - name: Copy go-task to task
+        run: |
+          ln -s /mnt/sys-root/bin/go-task /mnt/sys-root/bin/task
 
       - name: Install frpc
         run: |
@@ -82,6 +81,12 @@ jobs:
             chsh -s /bin/zsh root || true
           '
 
+      - name: Finalize & minimize rootfs
+        run: |
+          arch-chroot /mnt/sys-root bash -lc 'pacman-key --init && pacman-key --populate'
+          rm -rf /mnt/sys-root/var/cache/pacman/pkg/*
+          rm -rf /mnt/sys-root/var/lib/pacman/sync/*
+          
       - name: Configure WSL installation profile
         run: |
           mkdir -p /mnt/sys-root/usr/lib/wsl &&
