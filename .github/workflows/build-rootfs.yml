@@ -69,6 +69,19 @@ jobs:
           cp mmr-add-domain.sh /mnt/sys-root/usr/local/bin/mmr-add-domain
           chmod +x /mnt/sys-root/usr/local/bin/mmr-add-domain
 
+      - name: Install Zsh + Oh My Zsh + Powerlevel10k
+        run: |
+          arch-chroot /mnt/sys-root bash -lc '
+            set -euo pipefail
+            pacman -Sy --noconfirm zsh git wget curl
+      
+            mkdir -p /usr/share/oh-my-zsh
+            git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /usr/share/oh-my-zsh
+            git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /usr/share/oh-my-zsh/custom/themes/powerlevel10k
+      
+            chsh -s /bin/zsh root || true
+          '
+
       - name: Configure WSL installation profile
         run: |
           mkdir -p /mnt/sys-root/usr/lib/wsl &&
