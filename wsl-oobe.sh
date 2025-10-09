@@ -57,4 +57,7 @@ install -d -m 700 -o 1000 -g 1000 /run/user/1000
 runuser -l "$username" -c 'systemctl --user daemon-reload'
 runuser -l "$username" -c 'systemctl --user enable --now frpc.service'
 
+printf '\e[0;36m[*]\e[0m Start docker service.\n'
+sudo systemctl enable --now docker.service docker.socket
+
 printf '\e[0;92mDone! This Arch Linux on WSL installation is ready to use.\e[0m\n'
