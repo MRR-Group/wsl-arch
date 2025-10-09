@@ -5,6 +5,11 @@
 DEFAULT_GROUPS='adm,wheel,kvm,render,video,docker'
 DEFAULT_UID='1000'
 
+echo '  __  __ __  __ ___    ___ ___  ___  _   _ ___  '
+echo ' |  \/  |  \/  | _ \  / __| _ \/ _ \| | | | _ \ '
+echo ' | |\/| | |\/| |   / | (_ |   / (_) | |_| |  _/ '
+echo ' |_|  |_|_|  |_|_|_\  \___|_|_\\___/ \___/|_|   '
+echo ''
 echo 'Welcome to Arch Linux on WSL.'
 printf 'This image is built by MMR Group. Please read README \e[0;31mcarefully\e[0m.\n'
 echo ''
