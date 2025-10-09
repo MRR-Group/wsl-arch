@@ -2,8 +2,8 @@
 
 set -euo pipefail
 USER_NAME="${1:-$USER}"
-DOMAIN_BASE="mmr-group.pl"  
-SERVER_ADDR="<IPv4_SERWERA>"     
+DOMAIN_BASE="mrrgroup.pl"  
+SERVER_ADDR="194.9.6.83"     
 SERVER_PORT="7000"
 
 API_HOST="api.${USER_NAME}.${DOMAIN_BASE}"
