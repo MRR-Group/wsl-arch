@@ -19,5 +19,5 @@ localPort = 80
 customDomains = ["${API_HOST}"]
 EOF
 
-chown -R "${USER_NAME}:${USER_NAME}" "/home/${USER_NAME}/.config/frp"
-echo "Generated: /home/${USER_NAME}/.config/frp/frpc.toml (API: http://${API_HOST})"
+chown -R "${USER_NAME}:${USER_NAME}" "/home/${USER_NAME}/frpc.toml"
+echo "Generated: /home/${USER_NAME}/frpc.toml (API: http://${API_HOST})"
