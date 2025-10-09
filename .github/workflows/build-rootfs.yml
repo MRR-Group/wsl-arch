@@ -53,16 +53,15 @@ jobs:
       - name: Install yay
         run: |
           arch-chroot /mnt/sys-root bash -lc '
-            # safety: ensure deps (should already be present)
-            pacman -S --needed --noconfirm base-devel git go
-            # temp builder for makepkg
             id builder &>/dev/null || useradd -m -G wheel -s /bin/bash builder
             echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
+            
             cd /tmp
             sudo -u builder git clone https://aur.archlinux.org/yay-bin.git
             cd /tmp/yay-bin
             sudo -u builder makepkg -si --noconfirm
             cd /
+            
             rm -rf /tmp/yay-bin
             rm -f /etc/sudoers.d/01-builder
             userdel -r builder || true
@@ -75,11 +74,11 @@ jobs:
             echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
 
             cd /tmp
-            sudo -u builder git clone https://aur.archlinux.org/frpc-bin.git
+            sudo -u builder git clonehttps://aur.archlinux.org/frp.git
             cd /tmp/frpc-bin
             sudo -u builder makepkg -si --noconfirm
-
             cd /
+            
             rm -rf /tmp/frpc-bin
             rm -f /etc/sudoers.d/01-builder
             userdel -r builder || true
