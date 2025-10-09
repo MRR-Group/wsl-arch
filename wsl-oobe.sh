@@ -2,11 +2,11 @@
 
 #set -ue
 
-DEFAULT_GROUPS='adm,wheel,kvm,render,video'
+DEFAULT_GROUPS='adm,wheel,kvm,render,video,docker'
 DEFAULT_UID='1000'
 
 echo 'Welcome to Arch Linux on WSL.'
-printf 'This image is built by Azure Zeng. Please read README \e[0;31mcarefully\e[0m.\n'
+printf 'This image is built by MMR Group. Please read README \e[0;31mcarefully\e[0m.\n'
 echo ''
 echo 'Please create a default UNIX user account. The username does not need to match your Windows username.'
 echo 'For more information visit: https://aka.ms/wslusers'
@@ -45,5 +45,8 @@ printf '\e[0;36m[*]\e[0m Executing command "pacman-key --init"\n'
 pacman-key --init
 printf '\e[0;36m[*]\e[0m Executing command "pacman-key --populate"\n'
 pacman-key --populate
+
+/usr/local/bin/mmr-gen-frpc "$username"
+sudo -u "$username" systemctl --user enable --now frpc.service
 
 printf '\e[0;92mDone! This Arch Linux on WSL installation is ready to use.\e[0m\n'

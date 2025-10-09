@@ -14,21 +14,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install packages
+
+      - name: Install packages (builder env)
         run: | 
           pacman-key --init &&
           pacman-key --populate &&
           pacman -Sy --noconfirm archlinux-keyring &&
           pacman -Syu --noconfirm &&
-          pacman -S --noconfirm arch-install-scripts wget curl base-devel zip unzip
+          pacman -S --noconfirm arch-install-scripts wget curl base-devel zip unzip git bind openssh
+
       - name: Prepare environment
         run: |
           echo "IMAGE_VERSION=$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV &&
-          mkdir /mnt/sys-root-skeleton /mnt/sys-root &&
+          mkdir -p /mnt/sys-root-skeleton /mnt/sys-root &&
           mount --bind /mnt/sys-root-skeleton /mnt/sys-root &&
           wget -O target-pacman.conf https://gitlab.archlinux.org/archlinux/archiso/-/raw/master/configs/releng/pacman.conf
+
       - name: Initialize rootfs
-        run: pacstrap -G -M -C target-pacman.conf -K /mnt/sys-root base curl wget vim nano sudo texinfo man-db man-pages
+        run: |
+          pacstrap -G -M -C target-pacman.conf -K /mnt/sys-root \
+            base curl wget vim nano sudo texinfo man-db man-pages \
+            docker docker-compose nss openssh unzip htop git go base-devel dnsmasq
+
       - name: Configure
         run: |
           sed -i -e 's/^#Server/Server/g' /mnt/sys-root/etc/pacman.d/mirrorlist &&
@@ -39,9 +46,44 @@ jobs:
           arch-chroot /mnt/sys-root /usr/sbin/systemctl mask systemd-binfmt.service systemd-resolved.service systemd-networkd.service tmp.mount &&
           rm -rf /mnt/sys-root/etc/pacman.d/gnupg &&
           rm -rf /mnt/sys-root/var/lib/pacman/sync/ &&
-          rm /mnt/sys-root/etc/machine-id &&
-          touch /mnt/sys-root/etc/machine-id &&
+          rm -f /mnt/sys-root/etc/machine-id &&
+          : > /mnt/sys-root/etc/machine-id &&
           rm -rf /mnt/sys-root/var/cache/pacman/pkg/*
+
+      - name: Install yay
+        run: |
+          arch-chroot /mnt/sys-root bash -lc '
+            # safety: ensure deps (should already be present)
+            pacman -S --needed --noconfirm base-devel git go
+            # temp builder for makepkg
+            id builder &>/dev/null || useradd -m -G wheel -s /bin/bash builder
+            echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
+            cd /tmp
+            sudo -u builder git clone https://aur.archlinux.org/yay-bin.git
+            cd /tmp/yay-bin
+            sudo -u builder makepkg -si --noconfirm
+            cd /
+            rm -rf /tmp/yay-bin
+            rm -f /etc/sudoers.d/01-builder
+            userdel -r builder || true
+          '
+
+      - name: Install frpc
+        run: |
+          arch-chroot /mnt/sys-root bash -lc '
+            yay -S --noconfirm --needed frpc-bin
+          '
+
+      - name: Install mmr-gen-frpc
+        run: |
+          cp mmr-gen-frpc.sh /mnt/sys-root/usr/local/bin/mmr-gen-frpc
+          chmod +x /mnt/sys-root/usr/local/bin/mmr-gen-frpc
+
+      - name: Install mmr-add-domain
+        run: |
+          cp mmr-add-domain.sh /mnt/sys-root/usr/local/bin/mmr-add-domain
+          chmod +x /mnt/sys-root/usr/local/bin/mmr-add-domain
+
       - name: Configure WSL installation profile
         run: |
           mkdir -p /mnt/sys-root/usr/lib/wsl &&
@@ -50,12 +92,15 @@ jobs:
           chmod +x /mnt/sys-root/usr/lib/wsl/oobe.sh &&
           cp wsl.conf /mnt/sys-root/etc/wsl.conf &&
           cp wsl-distribution.conf /mnt/sys-root/etc/wsl-distribution.conf
+
       - name: Package final rootfs
         run: |
           tar -czf archlinux.wsl -C /mnt/sys-root ./
+
       - name: Generate sha256sums
         run: |
           sha256sum archlinux.wsl > sha256sums
+
       - name: Upload the final artifact
         uses: softprops/action-gh-release@v0.1.15
         with:
@@ -65,4 +110,3 @@ jobs:
             sha256sums
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        
