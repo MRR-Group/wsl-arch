@@ -43,7 +43,7 @@ jobs:
           sed -i -e 's/^#en_US.UTF-8/en_US.UTF-8/g' /mnt/sys-root/etc/locale.gen &&
           echo "%wheel ALL=(ALL:ALL) ALL" > /mnt/sys-root/etc/sudoers.d/wheel &&
           echo "tmpfs /tmp tmpfs mode=1777,strictatime,nosuid,nodev,size=50%,nr_inodes=1m 0 0" >> /mnt/sys-root/etc/fstab &&
-          arch-chroot /mnt/sys-root /usr/sbin/systemctl mask systemd-binfmt.service systemd-resolved.service systemd-networkd.service tmp.mount &&
+          arch-chroot /mnt/sys-root /usr/sbin/systemctl mask systemd-binfmt.service systemd-resolved.service systemd-networkd.service tmp.mount
 
       - name: Copy go-task to task
         run: |
