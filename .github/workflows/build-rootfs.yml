@@ -50,51 +50,13 @@ jobs:
           : > /mnt/sys-root/etc/machine-id &&
           rm -rf /mnt/sys-root/var/cache/pacman/pkg/*
 
-      - name: Install yay
-        run: |
-          arch-chroot /mnt/sys-root bash -lc '
-            set -euo pipefail
-            id builder &>/dev/null || useradd -m -G wheel -s /bin/bash builder
-            echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
-
-           su - builder -c "
-              set -e
-              cd /tmp
-              git clone https://aur.archlinux.org/yay-bin.git
-              cd yay-bin
-              makepkg -s --noconfirm
-            "
-            
-            pkgfile=$(ls /tmp/yay-bin/*.pkg.tar.zst | head -n1)
-            pacman -U --noconfirm \"$pkgfile\"
-      
-            rm -rf /tmp/yay-bin
-            userdel -r builder || true
-            rm -f /etc/sudoers.d/01-builder
-          '
-
       - name: Install frpc
         run: |
-          arch-chroot /mnt/sys-root bash -lc '
-            set -euo pipefail
-            id builder &>/dev/null || useradd -m -G wheel -s /bin/bash builder
-            echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01-builder
-
-            su - builder -c "
-              set -e
-              cd /tmp
-              git clone https://aur.archlinux.org/frp.git
-              cd frp
-              makepkg -s --noconfirm
-            "
-      
-            pkgfile=$(ls /tmp/frp/*.pkg.tar.zst | head -n1)
-            pacman -U --noconfirm \"$pkgfile\"
-      
-            rm -rf /tmp/frp
-            userdel -r builder || true
-            rm -f /etc/sudoers.d/01-builder
-          '
+          mkdir -p /mnt/sys-root/usr/local/bin
+          curl -L https://github.com/fatedier/frp/releases/latest/download/frp_0.65.0_linux_amd64.tar.gz -o /tmp/frp.tgz
+          tar -xzf /tmp/frp.tgz -C /tmp
+          cp /tmp/frp_*/frpc /mnt/sys-root/usr/local/bin/frpc
+          chmod +x /mnt/sys-root/usr/local/bin/frpc
 
       - name: Install mmr-gen-frpc
         run: |
