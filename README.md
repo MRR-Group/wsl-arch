@@ -35,6 +35,16 @@ wsl --install --from-file /path/to/archlinux.wsl
 wsl --import Arch-Dev C:\WSL\Arch-Dev .\archlinux.wsl
 ```
 
+## 💡 Install on a Different Drive
+
+```powershell
+wsl --import Arch-Dev E:\WSL\Arch D:\Downloads\archlinux.wsl
+```
+
+- `Arch-Dev` – the name under which the distro will appear in `wsl --list`.  
+- `E:\WSL\Arch` – the folder where WSL will store the filesystem.  
+- `D:\Downloads\archlinux.wsl` – path to your downloaded RootFS file.
+
 ## 🟢 First-Run OOBE
 1. Create your UNIX user account.
 2. systemd is enabled and Docker initialized.
