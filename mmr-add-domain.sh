@@ -5,16 +5,17 @@ USER_NAME="${SUDO_USER:-$USER}"
 CONF_DIR="/home/${USER_NAME}"
 CONF_FILE="${CONF_DIR}/frpc.toml"
 
-DOMAIN_BASE="mmr-group.pl"
+DOMAIN_BASE="mmrgroup.pl"
 
 if [[ $# -lt 2 ]]; then
-  echo "Usage: mmr-add-domain <subdomain-name> <localPort>"
+  echo "Usage: mmr-add-domain <subdomain-name> <localPort> <appName>"
   echo "Example: mmr-add-domain app 5173"
   exit 1
 fi
 
 SUB="$1"
 LOCAL_PORT="$2"
+APPNAME="$3"
 
 if [[ ! -f "$CONF_FILE" ]]; then
   echo "Could not find $CONF_FILE – generate it first with mmr-gen-frpc."
@@ -22,7 +23,7 @@ if [[ ! -f "$CONF_FILE" ]]; then
 fi
 
 PROXY_NAME="${USER_NAME}-${SUB}"
-CUSTOM_DOMAIN="${SUB}.${USER_NAME}.dev.${DOMAIN_BASE}"
+CUSTOM_DOMAIN="${SUB}.${APPNAME}.${USER_NAME}.${DOMAIN_BASE}"
 
 cat >>"$CONF_FILE" <<EOF
 
