@@ -62,7 +62,7 @@ jobs:
           arch-chroot /mnt/sys-root bash -lc '
             set -euo pipefail
             gem install rails --no-document
-            rustup-init -y --profile minimal
+            rustup default stable
           '
 
       - name: Configure PATH for gem, cargo, and bun
