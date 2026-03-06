@@ -48,13 +48,3 @@ wsl --import Arch-Dev E:\WSL\Arch D:\Downloads\archlinux.wsl
 ## 🟢 First-Run OOBE
 1. Create your UNIX user account.
 2. systemd is enabled and Docker initialized.
-3. `mmr-gen-frpc` generates your basic FRP config (~/frpc.toml).
-4. `frpc.service` is enabled (user-level) to start automatically.
-
-## ➕ Adding Extra Domains
-Expose another local port over FRP:
-```bash
-mmr-add-domain <name> <localPort>
-# e.g. mmr-add-domain app 5173
-```
-This appends a new `[[proxies]]` block to `~/frpc.toml` and restarts the client.

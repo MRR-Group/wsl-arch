@@ -34,7 +34,8 @@ jobs:
         run: |
           pacstrap -G -M -C target-pacman.conf -K /mnt/sys-root \
             base curl wget vim nano sudo texinfo man-db man-pages \
-            docker docker-compose nss openssh unzip htop git go base-devel dnsmasq go-task
+            docker docker-compose nss openssh unzip htop git go base-devel dnsmasq go-task \
+            ruby nodejs npm bun rustup
 
       - name: Configure
         run: |
@@ -45,28 +46,41 @@ jobs:
           echo "tmpfs /tmp tmpfs mode=1777,strictatime,nosuid,nodev,size=50%,nr_inodes=1m 0 0" >> /mnt/sys-root/etc/fstab &&
           arch-chroot /mnt/sys-root /usr/sbin/systemctl mask systemd-binfmt.service systemd-resolved.service systemd-networkd.service tmp.mount
 
-      - name: Copy go-task to task
+      - name: Ensure task binary
         run: |
-          ln -s /mnt/sys-root/bin/go-task /mnt/sys-root/bin/task
+          if [ -x /mnt/sys-root/usr/bin/go-task ]; then
+            ln -sf /usr/bin/go-task /mnt/sys-root/usr/bin/task
+            ln -sf /usr/bin/go-task /mnt/sys-root/bin/task
+          elif [ -x /mnt/sys-root/usr/bin/task ]; then
+            ln -sf /usr/bin/task /mnt/sys-root/bin/task
+          else
+            echo "task binary not found" && exit 1
+          fi
 
-      - name: Install frpc
+      - name: Install Rails and Rust toolchain
         run: |
-          mkdir -p /mnt/sys-root/usr/local/bin
-          curl -L https://github.com/fatedier/frp/releases/latest/download/frp_0.65.0_linux_amd64.tar.gz -o /tmp/frp.tgz
-          tar -xzf /tmp/frp.tgz -C /tmp
-          cp /tmp/frp_*/frpc /mnt/sys-root/usr/local/bin/frpc
-          chmod +x /mnt/sys-root/usr/local/bin/frpc
-          cp frpc.service /mnt/sys-root/usr/lib/systemd/user/frpc.service
+          arch-chroot /mnt/sys-root bash -lc '
+            set -euo pipefail
+            gem install rails --no-document
+            rustup-init -y --profile minimal
+          '
 
-      - name: Install mmr-gen-frpc
+      - name: Configure PATH for gem, cargo, and bun
         run: |
-          cp mmr-gen-frpc.sh /mnt/sys-root/usr/local/bin/mmr-gen-frpc
-          chmod +x /mnt/sys-root/usr/local/bin/mmr-gen-frpc
-
-      - name: Install mmr-add-domain
-        run: |
-          cp mmr-add-domain.sh /mnt/sys-root/usr/local/bin/mmr-add-domain
-          chmod +x /mnt/sys-root/usr/local/bin/mmr-add-domain
+          mkdir -p /mnt/sys-root/etc/profile.d
+          cat > /mnt/sys-root/etc/profile.d/gem.sh <<'EOF'
+          if command -v ruby >/dev/null 2>&1 && command -v gem >/dev/null 2>&1; then
+            GEM_HOME="$(ruby -e 'print Gem.default_dir')"
+            export GEM_HOME
+            export PATH="$GEM_HOME/bin:$PATH"
+          fi
+          EOF
+          cat > /mnt/sys-root/etc/profile.d/rustup.sh <<'EOF'
+          export PATH="$HOME/.cargo/bin:$PATH"
+          EOF
+          cat > /mnt/sys-root/etc/profile.d/bun.sh <<'EOF'
+          export PATH="$HOME/.bun/bin:$PATH"
+          EOF
 
       - name: Install Zsh + Oh My Zsh + Powerlevel10k
         run: |
